@@ -3,12 +3,11 @@ from parallellinear.datatypes.Vector import Vector
 
 class Layer():
 
-    nodeValues=None
-    weights=None
-    biases=None
 
     def __init__(self, data):
         self.nodeValues = data
+        self.weights = None
+        self.biases = None
 
     @classmethod
     def randomLayer(cls, numberOfNodes):
