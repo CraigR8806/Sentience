@@ -1,4 +1,5 @@
 from src.sentience.netsupport.HiddenLayer import HiddenLayer
+from src.sentience.netsupport.OutputLayer import OutputLayer
 from src.sentience.netsupport.Layer import Layer
 from parallellinear.datatypes.Vector import Vector
 import parallellinear.calculations.ParallelLinear as pl
@@ -11,7 +12,7 @@ class Net:
 
 
 
-    hiddenLayers=[]
+    layers=[]
     numberOfInputNodes=0
     numberOfOutputNodes=0
     numberOfNodesPerHiddenLayer=[]
@@ -42,8 +43,10 @@ class Net:
         pl.loadCustomFunction(self.activationFunction, Net.activationFunctions[self.activationFunction])
         previousLayersNumberOfNodes = numberOfInputNodes
         for num in numberOfNodesPerHiddenLayer:
-            self.hiddenLayers.append(HiddenLayer.randomHiddenLayer(num, previousLayersNumberOfNodes))
+            self.layers.append(HiddenLayer.randomHiddenLayer(num, previousLayersNumberOfNodes))
             previousLayersNumberOfNodes = num
+
+        self.layers.append(OutputLayer.randomOutputLayer(numberOfOutputNodes, self.layers[-1].getNumberOfNodes()))
 
         
 
@@ -51,11 +54,13 @@ class Net:
     
 
     def forwardProp(self, input):
-        inn = Layer(Vector(input))
-        for layer in self.hiddenLayers:
+        inn = Layer(Vector.vectorFromList(input))
+        for layer in self.layers:
+            print(type(inn.getNodes().getData()))
             inn = Layer(inn.getNodes().multiply(layer.getWeights()))
             inn.getNodes().add(layer.getBiases())
             inn.getNodes().applyCustomFunction(self.activationFunction)
+            layer.setNodes(inn)
 
-        return inn.getNodes().exportToList()
+        return layer[-1].getNodes().exportToList()
     
