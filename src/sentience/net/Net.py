@@ -9,14 +9,7 @@ import parallellinear.calculations.ParallelLinear as pl
 
 
 class Net:
-
-
-
-    layers=[]
-    numberOfInputNodes=0
-    numberOfOutputNodes=0
-    numberOfNodesPerHiddenLayer=[]
-    activationFunction = "sigmoid"
+    
 
     activationFunctions = {
         "sigmoid": '$i = 1/(1+exp(-$i));'
@@ -32,21 +25,24 @@ class Net:
         self.numberOfInputNodes = numberOfInputNodes
         self.numberOfOutputNodes = numberOfOutputNodes
         self.numberOfNodesPerHiddenLayer = numberOfNodesPerHiddenLayer
-
-        print(Net.activationFunctions)
-        print(activationFunction)
-
-        if activationFunction not in list(Net.activationFunctions.keys()):
-            raise ValueError(activationFunction + " has not been loaded.  Please use Net.loadCustomActivationFunction(function_name, func) to load the function")
         self.activationFunction = activationFunction
-        pl.loadPrograms()
-        pl.loadCustomFunction(self.activationFunction, Net.activationFunctions[self.activationFunction])
+        self.layers = []
+
         previousLayersNumberOfNodes = numberOfInputNodes
         for num in numberOfNodesPerHiddenLayer:
             self.layers.append(HiddenLayer.randomHiddenLayer(num, previousLayersNumberOfNodes))
             previousLayersNumberOfNodes = num
 
         self.layers.append(OutputLayer.randomOutputLayer(numberOfOutputNodes, self.layers[-1].getNumberOfNodes()))
+
+    @classmethod
+    def randomWeightAndBiasNet(cls, numberOfInputNodes:int, numberOfOutputNodes:int, numberOfNodesPerHiddenLayer:list, activationFunction="sigmoid"):
+        pl.loadPrograms()
+        if activationFunction not in list(Net.activationFunctions.keys()):
+            raise ValueError(activationFunction + " has not been loaded.  Please use Net.loadCustomActivationFunction(function_name, func) to load the function")
+        pl.loadCustomFunction(activationFunction, Net.activationFunctions[activationFunction])
+        return cls(numberOfInputNodes=numberOfInputNodes, numberOfOutputNodes=numberOfOutputNodes, numberOfNodesPerHiddenLayer=numberOfNodesPerHiddenLayer, activationFunction=activationFunction)
+        
 
         
 
@@ -56,11 +52,10 @@ class Net:
     def forwardProp(self, input):
         inn = Layer(Vector.vectorFromList(input))
         for layer in self.layers:
-            print(type(inn.getNodes().getData()))
             inn = Layer(inn.getNodes().multiply(layer.getWeights()))
             inn.getNodes().add(layer.getBiases())
             inn.getNodes().applyCustomFunction(self.activationFunction)
-            layer.setNodes(inn)
+            layer.setNodes(inn.getNodes())
 
-        return layer[-1].getNodes().exportToList()
+        return self.layers[-1].getNodes().exportToList()
     

@@ -11,7 +11,6 @@ class HiddenLayer(Layer):
         super().__init__(data)
         self.weights = weights
         self.biases = biases
-        print(type(self.weights))
 
     @classmethod
     def randomHiddenLayer(cls, numberOfNodes, previousLayersNumberOfNodes):
