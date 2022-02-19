@@ -1,4 +1,4 @@
-from sentience.netsupport.training.inputtype.Input import Input
+from sentience.training.inputtype.Input import Input
 import numpy as np
 
 
