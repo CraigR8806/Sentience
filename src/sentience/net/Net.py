@@ -1,9 +1,10 @@
-from src.sentience.netsupport.HiddenLayer import HiddenLayer
-from src.sentience.netsupport.OutputLayer import OutputLayer
-from src.sentience.netsupport.Layer import Layer
+from sentience.netsupport.HiddenLayer import HiddenLayer
+from sentience.netsupport.OutputLayer import OutputLayer
+from sentience.netsupport.Layer import Layer
 from parallellinear.datatypes.Vector import Vector
 import parallellinear.calculations.ParallelLinear as pl
 import numpy as np
+import pickle as p
 
 
 
@@ -22,28 +23,38 @@ class Net:
         Net.activationFunctions[function_name] = func
         pl.loadCustomFunction(function_name, func)
 
-    def __init__(self, numberOfInputNodes:int, numberOfOutputNodes:int, numberOfNodesPerHiddenLayer:list, activationFunction="sigmoid"):
+    def __init__(self, numberOfInputNodes:int, numberOfOutputNodes:int, layers:list, activationFunction="sigmoid"):
+        pl.loadPrograms()
+        pl.loadCustomFunction(activationFunction, Net.activationFunctions[activationFunction])
         self.numberOfInputNodes = numberOfInputNodes
         self.numberOfOutputNodes = numberOfOutputNodes
-        self.numberOfNodesPerHiddenLayer = numberOfNodesPerHiddenLayer
         self.activationFunction = activationFunction
-        self.layers = []
+        self.layers = layers
 
-        previousLayersNumberOfNodes = numberOfInputNodes
-        self.layers.append(Layer(Vector.zeros(numberOfInputNodes)))
-        for num in numberOfNodesPerHiddenLayer:
-            self.layers.append(HiddenLayer.randomHiddenLayer(num, previousLayersNumberOfNodes))
-            previousLayersNumberOfNodes = num
 
-        self.layers.append(OutputLayer.randomOutputLayer(numberOfOutputNodes, self.layers[-1].getNumberOfNodes()))
+    @classmethod
+    def loadNetFromFile(cls, path):
+        savedNet=None
+        with open(path, 'rb') as file:
+            savedNet=file.read()
+        net=p.loads(savedNet)
+        return cls(numberOfInputNodes=net.numberOfInputNodes, numberOfOutputNodes=net.numberOfOutputNodes, layers=net.layers)
 
     @classmethod
     def randomWeightAndBiasNet(cls, numberOfInputNodes:int, numberOfOutputNodes:int, numberOfNodesPerHiddenLayer:list, activationFunction="sigmoid"):
-        pl.loadPrograms()
         if activationFunction not in list(Net.activationFunctions.keys()):
             raise ValueError(activationFunction + " has not been loaded.  Please use Net.loadCustomActivationFunction(function_name, func) to load the function")
-        pl.loadCustomFunction(activationFunction, Net.activationFunctions[activationFunction])
-        return cls(numberOfInputNodes=numberOfInputNodes, numberOfOutputNodes=numberOfOutputNodes, numberOfNodesPerHiddenLayer=numberOfNodesPerHiddenLayer, activationFunction=activationFunction)
+        layers=[]
+
+        previousLayersNumberOfNodes = numberOfInputNodes
+        layers.append(Layer(Vector.zeros(numberOfInputNodes)))
+        for num in numberOfNodesPerHiddenLayer:
+            layers.append(HiddenLayer.randomHiddenLayer(num, previousLayersNumberOfNodes))
+            previousLayersNumberOfNodes = num
+
+        layers.append(OutputLayer.randomOutputLayer(numberOfOutputNodes, layers[-1].getNumberOfNodes()))
+        
+        return cls(numberOfInputNodes=numberOfInputNodes, numberOfOutputNodes=numberOfOutputNodes, layers=layers, activationFunction=activationFunction)
         
 
         
@@ -87,14 +98,7 @@ class Net:
     def sigmoidPrime(self, s):
         return s.elementWiseMultiply(s.subScalerFrom(1, in_place=False), in_place=False)
 
-    # def backward(self, X, y, o):
-    #     # backward propgate through the network
-    #     self.o_error = y - o  # error in output
-    #     self.o_delta = self.o_error * self.sigmoidPrime(o)  # applying derivative of sigmoid to error
-
-    #     self.z2_error = self.o_delta.dot(
-    #         self.W2.T)  # z2 error: how much our hidden layer weights contributed to output error
-    #     self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)  # applying derivative of sigmoid to z2 error
-
-    #     self.W1 += X.T.dot(self.z2_delta)  # adjusting first set (input --> hidden) weights
-    #     self.W2 += self.z2.T.dot(self.o_delta)  # adjusting second set (hidden --> output) weights
+    def exportNetToFile(self, path):
+        savedNet=p.dumps(self)
+        with open(path, 'wb') as file:
+            file.write(savedNet)

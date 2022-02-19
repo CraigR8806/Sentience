@@ -1,4 +1,4 @@
-from src.sentience.netsupport.Layer import Layer
+from sentience.netsupport.Layer import Layer
 from parallellinear.datatypes.Vector import Vector
 from parallellinear.datatypes.Matrix import Matrix
 

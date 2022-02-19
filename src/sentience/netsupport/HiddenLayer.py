@@ -1,6 +1,6 @@
 from parallellinear.datatypes.Matrix import Matrix
 from parallellinear.datatypes.Vector import Vector
-from src.sentience.netsupport.Layer import Layer
+from sentience.netsupport.Layer import Layer
 
 class HiddenLayer(Layer):
     
