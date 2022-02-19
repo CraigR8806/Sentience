@@ -14,7 +14,7 @@ class HiddenLayer(Layer):
 
     @classmethod
     def randomHiddenLayer(cls, numberOfNodes, previousLayersNumberOfNodes):
-        return cls(data=Vector.zerosVector(numberOfNodes), 
-            weights=Matrix.randomMatrix(previousLayersNumberOfNodes, numberOfNodes, 
-            random_low=-1), biases=Vector.randomVector(numberOfNodes))
+        return cls(data=Vector.zeros(numberOfNodes), 
+            weights=Matrix.random(previousLayersNumberOfNodes, numberOfNodes, 
+            random_low=-1), biases=Vector.random(numberOfNodes))
 

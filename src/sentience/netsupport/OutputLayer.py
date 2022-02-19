@@ -11,6 +11,7 @@ class OutputLayer(Layer):
 
     @classmethod
     def randomOutputLayer(cls, numberOfOutputNodes, previousLayersNumberOfNodes):
-        return cls(data=Vector.zerosVector(numberOfOutputNodes), 
-            weights=Matrix.randomMatrix(previousLayersNumberOfNodes, numberOfOutputNodes, 
-            random_low=-1), biases=Vector.zerosVector(numberOfOutputNodes))
+        return cls(data=Vector.zeros(numberOfOutputNodes), 
+            weights=Matrix.random(previousLayersNumberOfNodes, numberOfOutputNodes, 
+            random_low=-1), biases=Vector.zeros(numberOfOutputNodes))
+            

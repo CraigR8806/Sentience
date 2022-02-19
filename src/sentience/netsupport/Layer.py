@@ -4,7 +4,7 @@ from parallellinear.datatypes.Vector import Vector
 class Layer():
 
 
-    def __init__(self, data):
+    def __init__(self, data:Vector):
         self.nodeValues = data
         self.weights = None
         self.biases = None
@@ -15,6 +15,9 @@ class Layer():
 
     def getNodes(self):
         return self.nodeValues
+
+    def getNode(self, index):
+        return self.nodeValues[index]
 
     def setNodes(self, nodes):
         self.nodeValues = nodes
