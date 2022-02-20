@@ -1,12 +1,9 @@
-from sentience.training.inputtype.Input import Input
+from sentience.training.targettype.Target import Target
 import numpy as np
 
 
 
-class CategoricalInput(Input):
-
-
-
+class CategoricalTarget(Target):
 
 
     def __init__(self, name:str, categoryEnumeration:list):
@@ -14,12 +11,9 @@ class CategoricalInput(Input):
         self.categoryEnumeration = categoryEnumeration
 
 
-    def addValueToInput(self, value, input:list):
+    def addValueToTargetList(self, value, target:list):
         for category in self.categoryEnumeration:
             if category == value:
-                input.append(np.float32(1))
+                target.append(np.float32(1))
             else:
-                input.append(np.float32(0))
-        
-
-
+                target.append(np.float32(0))

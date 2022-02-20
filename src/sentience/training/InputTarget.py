@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class InputOutput(ABC):
+class InputTarget(ABC):
 
 
 
