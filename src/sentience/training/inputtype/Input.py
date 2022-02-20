@@ -1,12 +1,17 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from sentience.training.InputOutput import InputOutput
 
 
-class Input(ABC):
+class Input(InputOutput):
 
 
+    def __init(self, name:str):
+        super().__init__(name)
 
 
-   @abstractmethod
-   def addValueToInput(self, value, input):
+    @abstractmethod
+    def addValueToInput(self, value, input):
        pass
+
+
 

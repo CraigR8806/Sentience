@@ -6,7 +6,8 @@ import numpy as np
 class ContinuousInput(Input):
 
 
-    def __init__(self, minValue:np.float32, maxValue:np.float32):
+    def __init__(self, name:str, minValue:np.float32, maxValue:np.float32):
+        super().__init__(name)
         self.minValue=minValue
         self.maxValue=maxValue
 
