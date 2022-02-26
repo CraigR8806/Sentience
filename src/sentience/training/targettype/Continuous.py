@@ -16,4 +16,4 @@ class ContinuousTarget(Target):
 
 
     def normalizeValue(self, value:np.float32) -> np.float32:
-        return (value - self.minValue)/(self.maxValue - self.minValue)
+        return np.float32((value - self.minValue)/(self.maxValue - self.minValue))

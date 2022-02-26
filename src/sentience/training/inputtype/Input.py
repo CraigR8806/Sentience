@@ -10,7 +10,7 @@ class Input(InputTarget):
 
 
     @abstractmethod
-    def addValueToInput(self, value, input):
+    def addValueToInputList(self, value, input):
        pass
 
 

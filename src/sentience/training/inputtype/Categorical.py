@@ -14,7 +14,7 @@ class CategoricalInput(Input):
         self.categoryEnumeration = categoryEnumeration
 
 
-    def addValueToInput(self, value, input:list):
+    def addValueToInputList(self, value, input:list):
         for category in self.categoryEnumeration:
             if category == value:
                 input.append(np.float32(1))

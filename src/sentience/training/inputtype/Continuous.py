@@ -12,8 +12,8 @@ class ContinuousInput(Input):
         self.maxValue=maxValue
 
     def normalizeValue(self, value:np.float32) -> np.float32:
-        return (value - self.minValue)/(self.maxValue - self.minValue)
+        return np.float32((float(value) - float(self.minValue))/(float(self.maxValue) - float(self.minValue)))
 
 
-    def addValueToInput(self, value:np.float32, input:list) -> np.float32:
-        input.append(self.normalizedValue(value))
+    def addValueToInputList(self, value:np.float32, input:list) -> np.float32:
+        input.append(self.normalizeValue(value))
