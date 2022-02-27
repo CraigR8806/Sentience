@@ -1,5 +1,6 @@
 import time
 from sentience.training.TrainingDataSpecification import TrainingDataSpecification
+from sentience.training.parser.Parser import Parser
 from sentience.net.Net import Net
 import numpy as np
 
@@ -14,8 +15,8 @@ class TrainingData:
 
 
     @classmethod
-    def fromFileWithNewNet(cls, dataPath:str, specificationPath:str, numberOfHiddenNodesPerHiddenLayer = None, data_delimiter=",", specification_field_delimiter=":", specification_value_delimiter=","):
-        specification, trainingData = TrainingData._loadDataAndSpecificationfromFile(dataPath, specificationPath, data_delimiter=data_delimiter, specification_field_delimiter=specification_field_delimiter, specification_value_delimiter=specification_value_delimiter)
+    def fromFileWithNewNet(cls, filesPurposeMappedToPath:dict, parser:Parser, numberOfHiddenNodesPerHiddenLayer = None):
+        specification, trainingData = parser.loadTrainingDataAndSpecificationFromDictionaryOfFiles(filesPurposeMappedToPath)
         if numberOfHiddenNodesPerHiddenLayer == None:
             numberOfHiddenNodesPerHiddenLayer=[int(np.ceil(specification.getNumberOfInputNodes() * .666 + specification.getNumberOfTargetNodes()))]
         
@@ -26,29 +27,10 @@ class TrainingData:
         return cls(trainingDataSpecification=specification, trainingData=trainingData, net=net)
 
     @classmethod
-    def fromFileWithSavedNet(cls, dataPath:str, specificationPath:str, netPath:str, data_delimiter=",", specification_field_delimiter=":", specification_value_delimiter=","):
-        specification, trainingData = TrainingData._loadDataAndSpecificationfromFile(dataPath, specificationPath, data_delimiter=data_delimiter, specification_field_delimiter=specification_field_delimiter, specification_value_delimiter=specification_value_delimiter)
-
+    def fromFileWithSavedNet(cls, filesPurposeMappedToPath:dict, parser:Parser, netPath:str):
+        specification, trainingData = parser.loadTrainingDataAndSpecificationFromDictionaryOfFiles(filesPurposeMappedToPath)
         net = Net.loadNetFromFile(netPath)
-
         return cls(trainingDataSpecification=specification, trainingData=trainingData, net=net)
-
-    def _loadDataAndSpecificationfromFile(dataPath, specificationPath,  data_delimiter=",", specification_field_delimiter=":", specification_value_delimiter=","):
-        specification = TrainingDataSpecification.fromFile(specificationPath, dataPath, data_delimiter=data_delimiter, field_delimiter=specification_field_delimiter, value_delimiter=specification_value_delimiter)
-        trainingData = []
-        with open(dataPath, 'r') as file:
-            for line in file.readlines():
-                input = []
-                target = []
-                values=[val.strip() for val in line.removesuffix("\n").split(data_delimiter)]
-                for i in range(len(specification.getFeatures())):
-                    input.append(values[i])
-                for i in range(len(specification.getFeatures()), len(values)):
-                    target.append(values[i])
-                trainingData.append({"input":input, "target": target})
-
-        return (specification, trainingData)
-
 
 
     def trainOnFullSet(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int):
