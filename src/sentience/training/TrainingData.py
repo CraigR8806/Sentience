@@ -57,6 +57,7 @@ class TrainingData:
         for i in range(numberOfIterations):
             allTrainingIndicies=[index for index in range(len(self.trainingData))]
             for j in range(numberOfRandomSamples):
+                print(j)
                 index = allTrainingIndicies[np.random.randint(0, len(allTrainingIndicies))]
                 allTrainingIndicies.remove(index)
                 input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
