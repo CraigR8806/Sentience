@@ -57,7 +57,7 @@ class TrainingData:
         for i in range(numberOfIterations):
             allTrainingIndicies=[index for index in range(len(self.trainingData))]
             for j in range(numberOfRandomSamples):
-                print("On Training Item " + str(j) + " of " + int(numberOfRandomSamples*numberOfIterations))
+                print("On Training Item " + str(j) + " of " + str(numberOfRandomSamples*numberOfIterations))
                 index = allTrainingIndicies[np.random.randint(0, len(allTrainingIndicies))]
                 allTrainingIndicies.remove(index)
                 input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
@@ -97,7 +97,7 @@ class TrainingData:
             input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
             output=self.net.forwardProp(input)
             correct = True
-            print("On Testing Item " + str(j) + " of " + int(numberOfSamples))
+            print("On Testing Item " + str(j) + " of " + str(numberOfSamples))
             # print(str(targets[index]) + "  -  " + str(output))
             for j in range(len(target)):
                 delta = abs(target[j] - output[j])
