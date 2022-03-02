@@ -51,8 +51,8 @@ class TrainingData:
             loading_start = time.time()
             inputs, targets = self._normalizeTrainingData()
             loading_stop = time.time()
-        print('...Begin training output...')
-        print("loading time: " + str(loading_stop - loading_start) + " seconds")
+            print('...Begin training output...')
+            print("loading time: " + str(loading_stop - loading_start) + " seconds")
         start=time.time()
         for i in range(numberOfIterations):
             allTrainingIndicies=[index for index in range(len(self.trainingData))]
