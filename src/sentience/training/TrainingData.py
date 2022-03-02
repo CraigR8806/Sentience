@@ -33,17 +33,24 @@ class TrainingData:
         return cls(trainingDataSpecification=specification, trainingData=trainingData, net=net)
 
 
-    def trainOnFullSet(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int):
-        inputs, targets = self._normalizeTrainingData()
+    def trainOnFullSet(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int, lazyLoad=False):
+        inputs=[]
+        targets=[]
+        if not lazyLoad:
+            inputs, targets = self._normalizeTrainingData()
 
         for i in range(numberOfIterations):
             for i in range(len(inputs)):
-                self.net.train(learningRate, biasLearningRate, inputs[i], targets[i])
+                input, target = self.getNormalizedTrainingDataItem(i, inputs, targets, lazyLoad)
+                self.net.train(learningRate, biasLearningRate, input, target)
 
-    def trainOnRandomSelectionFromSet(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int, numberOfRandomSamples:int):
-        loading_start = time.time()
-        inputs, targets = self._normalizeTrainingData()
-        loading_stop = time.time()
+    def trainOnRandomSelectionFromSet(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int, numberOfRandomSamples:int, lazyLoad=False):
+        inputs=[]
+        targets=[]
+        if not lazyLoad:
+            loading_start = time.time()
+            inputs, targets = self._normalizeTrainingData()
+            loading_stop = time.time()
         print('...Begin training output...')
         print("loading time: " + str(loading_stop - loading_start) + " seconds")
         start=time.time()
@@ -52,36 +59,42 @@ class TrainingData:
             for j in range(numberOfRandomSamples):
                 index = allTrainingIndicies[np.random.randint(0, len(allTrainingIndicies))]
                 allTrainingIndicies.remove(index)
-                self.net.train(learningRate, biasLearningRate, inputs[index], targets[index])
+                input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
+                self.net.train(learningRate, biasLearningRate, input, target)
         stop=time.time()
         print("processing time: " + str(stop - start) + " seconds")
         print('...End training output...')
         
 
-    def trainOnFullSetRandomly(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int):
-        self.trainOnRandomSelectionFromSet(learningRate, biasLearningRate, numberOfIterations, len(self.trainingData))
+    def trainOnFullSetRandomly(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int, lazyLoad=False):
+        self.trainOnRandomSelectionFromSet(learningRate, biasLearningRate, numberOfIterations, len(self.trainingData), lazyLoad)
 
     def testNet(self, dataIndex:int):
         inputs, targets = self._normalizeTrainingData()
         return (self.net.forwardProp(inputs[dataIndex]), targets[dataIndex])
 
-    def testNetWithRandomSample(self, numberOfSamples:int, threshhold=0.01):
-        loading_start=time.time()
-        inputs, targets = self._normalizeTrainingData()
-        loading_stop=time.time()
-        print('...Begin testing output...')
-        print("loading time: " + str(loading_stop - loading_start) + " seconds")
+    def testNetWithRandomSample(self, numberOfSamples:int, threshhold=0.01, lazyLoad=False):
+        inputs=[]
+        targets=[]
+        if not lazyLoad:
+            loading_start=time.time()
+            inputs, targets = self._normalizeTrainingData()
+            loading_stop=time.time()
+            print('...Begin testing output...')
+            print("loading time: " + str(loading_stop - loading_start) + " seconds")
+
         numberCorrect=0
         allTrainingIndicies=[index for index in range(len(self.trainingData))]
         start=time.time()
         for i in range(numberOfSamples):
             index = allTrainingIndicies[np.random.randint(0, len(allTrainingIndicies))]
             allTrainingIndicies.remove(index)
-            output=self.net.forwardProp(inputs[index])
+            input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
+            output=self.net.forwardProp(input)
             correct = True
             # print(str(targets[index]) + "  -  " + str(output))
-            for j in range(len(targets[index])):
-                delta = abs(targets[index][j] - output[j])
+            for j in range(len(target)):
+                delta = abs(target[j] - output[j])
                 # print(str(delta) + " " + str(threshhold) + " " + str(delta >= threshhold))
                 if delta >= threshhold:
                     correct=False
@@ -93,24 +106,35 @@ class TrainingData:
         print('...End testing output...')
         return str(100*(numberCorrect/numberOfSamples)) + "% Accuracy"
 
-    def testNetWithFullSet(self, threshhold=0.01):
-        return self.testNetWithRandomSample(len(self.trainingData), threshhold)
+    def testNetWithFullSet(self, threshhold=0.01, lazyLoad=False):
+        return self.testNetWithRandomSample(len(self.trainingData), threshhold, lazyLoad)
 
+
+    def getNormalizedTrainingDataItem(self, index, inputs, targets, lazyLoad):
+        if lazyLoad:
+            return self._normalizeOneTrainingItem(index)
+        else:
+            return (inputs[index], targets[index])
 
 
     def _normalizeTrainingData(self):
         inputs=[]
         targets=[]
-        for data in self.trainingData:
-            input=[]
-            target=[]
-            for i in range(len(data['input'])):
-                self.trainingDataSpecification.getFeatures()[i].addValueToInputList(data['input'][i], input)
-            for i in range(len(data['target'])):
-                self.trainingDataSpecification.getTargets()[i].addValueToTargetList(data['target'][i], target)
+        for i  in range(len(self.trainingData)):
+            input, target = self._normalizeOneTrainingItem(i)
             inputs.append(input)
             targets.append(target)
         return (inputs, targets)
+
+    def _normalizeOneTrainingItem(self, index):
+        input=[]
+        target=[]
+        data=self.trainingData[index]
+        for i in range(len(data['input'])):
+            self.trainingDataSpecification.getFeatures()[i].addValueToInputList(data['input'][i], input)
+        for i in range(len(data['target'])):
+            self.trainingDataSpecification.getTargets()[i].addValueToTargetList(data['target'][i], target)
+        return (input, target)
 
     def saveNetToFile(self, path:str):
         self.net.exportNetToFile(path)
