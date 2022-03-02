@@ -57,7 +57,7 @@ class TrainingData:
         for i in range(numberOfIterations):
             allTrainingIndicies=[index for index in range(len(self.trainingData))]
             for j in range(numberOfRandomSamples):
-                print(j)
+                print("On Training Item " + str(j) + " of " + int(numberOfRandomSamples*numberOfIterations))
                 index = allTrainingIndicies[np.random.randint(0, len(allTrainingIndicies))]
                 allTrainingIndicies.remove(index)
                 input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
@@ -70,9 +70,13 @@ class TrainingData:
     def trainOnFullSetRandomly(self, learningRate:np.float32, biasLearningRate:np.float32, numberOfIterations:int, lazyLoad=False):
         self.trainOnRandomSelectionFromSet(learningRate, biasLearningRate, numberOfIterations, len(self.trainingData), lazyLoad)
 
-    def testNet(self, dataIndex:int):
-        inputs, targets = self._normalizeTrainingData()
-        return (self.net.forwardProp(inputs[dataIndex]), targets[dataIndex])
+    def testNet(self, dataIndex:int, lazyLoad=False):
+        inputs=[]
+        targets=[]
+        if not lazyLoad:
+            inputs, targets = self._normalizeTrainingData()
+        input, target = self.getNormalizedTrainingDataItem(dataIndex, inputs, targets, lazyLoad)
+        return (self.net.forwardProp(input), target)
 
     def testNetWithRandomSample(self, numberOfSamples:int, threshhold=0.01, lazyLoad=False):
         inputs=[]
@@ -93,6 +97,7 @@ class TrainingData:
             input, target = self.getNormalizedTrainingDataItem(index, inputs, targets, lazyLoad)
             output=self.net.forwardProp(input)
             correct = True
+            print("On Testing Item " + str(j) + " of " + int(numberOfSamples))
             # print(str(targets[index]) + "  -  " + str(output))
             for j in range(len(target)):
                 delta = abs(target[j] - output[j])
